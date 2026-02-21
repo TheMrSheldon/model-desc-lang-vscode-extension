@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
       - name: Compile extension
-        run: pnpm run compile
+        run: pnpm run package
       - name: Compute nightly version
         id: version
         run: |
