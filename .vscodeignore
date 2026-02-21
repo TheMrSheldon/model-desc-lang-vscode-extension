@@ -1,8 +1,10 @@
+.devcontainer/**
+.github/**
 .vscode/**
 .vscode-test/**
 out/**
 node_modules/**
-src/**
+src/**/*.ts
 .gitignore
 .yarnrc
 webpack.config.js
