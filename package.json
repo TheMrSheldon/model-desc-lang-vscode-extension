@@ -9,9 +9,26 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
-  "main": "./dist/extension.js",
+  "activationEvents": [
+  ],
+  "main": "./dist/client.js",
   "contributes": {
+    "languages": [
+      {
+        "id": "model-desc-lang",
+        "extensions": [
+          ".dlm"
+        ],
+        "configuration": "./src/syntaxes/language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "model-desc-lang",
+        "scopeName": "source.model-desc-lang",
+        "path": "./src/syntaxes/model-desc-lang.tmLanguage.json"
+      }
+    ],
     "commands": [
       {
         "command": "mdl-language-server.helloWorld",
@@ -44,6 +61,8 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
-    "vscode-languageserver": "^9.0.1"
+    "vscode-languageclient": "^9.0.1",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12"
   }
 }
