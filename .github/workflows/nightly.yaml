@@ -24,10 +24,6 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
       - name: Install dependencies
         run: pnpm install
       - name: Compile extension
@@ -48,12 +44,7 @@ jobs:
       - name: Install vsce
         run: pnpm add -g @vscode/vsce
       - name: Package VSIX
-        run: vsce package --no-dependencies
-      - name: Get VSIX filename
-        id: vsix
-        run: |
-          FILE=$(ls *.vsix)
-          echo "file=$FILE" >> $GITHUB_OUTPUT
+        run: vsce package --no-dependencies --out mdl-extension.vsix
       - name: Delete previous nightly release
         continue-on-error: true
         run: |
@@ -67,6 +58,6 @@ jobs:
             --title "Nightly Build" \
             --notes "Automated nightly build from master branch." \
             --prerelease \
-            ${{ steps.vsix.outputs.file }}
+            mdl-extension.vsix
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
