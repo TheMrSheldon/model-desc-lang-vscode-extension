@@ -1,0 +1,68 @@
+name: Nightly Build
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  build-nightly:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Install dependencies
+        run: pnpm install
+      - name: Compile extension
+        run: pnpm run compile
+      - name: Compute nightly version
+        id: version
+        run: |
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          DATE=$(date +'%Y%m%d')
+          BASE_VERSION=$(jq -r .version package.json)
+          NIGHTLY_VERSION="${BASE_VERSION}-nightly.${DATE}+${COMMIT_SHA}"
+          echo "nightly_version=$NIGHTLY_VERSION" >> $GITHUB_OUTPUT
+          echo "Patched version: $NIGHTLY_VERSION"
+      - name: Patch package.json
+        run: |
+          jq ".version = \"${{ steps.version.outputs.nightly_version }}\"" package.json > package.tmp.json
+          mv package.tmp.json package.json
+      - name: Install vsce
+        run: pnpm add -g @vscode/vsce
+      - name: Package VSIX
+        run: vsce package --no-dependencies
+      - name: Get VSIX filename
+        id: vsix
+        run: |
+          FILE=$(ls *.vsix)
+          echo "file=$FILE" >> $GITHUB_OUTPUT
+      - name: Delete previous nightly release
+        continue-on-error: true
+        run: |
+          gh release delete nightly --yes || true
+          git push --delete origin nightly || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create nightly release
+        run: |
+          gh release create nightly \
+            --title "Nightly Build" \
+            --notes "Automated nightly build from master branch." \
+            --prerelease \
+            ${{ steps.vsix.outputs.file }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
