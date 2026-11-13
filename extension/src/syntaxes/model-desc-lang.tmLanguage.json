@@ -1,0 +1,142 @@
+{
+  "name": "Model Description Language",
+  "scopeName": "source.model-desc-lang",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#brackets" },
+    { "include": "#declaration-keywords" },
+    { "include": "#control-keywords" },
+    { "include": "#function-calls" },
+    { "include": "#einops" },
+    { "include": "#types" },
+    { "include": "#numbers" },
+    { "include": "#operators" },
+    { "include": "#identifiers" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.block.mdl",
+          "begin": "/\\*",
+          "beginCaptures": { "0": { "name": "punctuation.definition.comment.begin.mdl" } },
+          "end": "\\*/",
+          "endCaptures": { "0": { "name": "punctuation.definition.comment.end.mdl" } },
+          "patterns": [
+            {
+              "name": "keyword.documentation.mdl",
+              "match": "@[_A-Za-z][A-Za-z0-9_-]*"
+            }
+          ]
+        },
+        {
+          "name": "comment.line.double-slash.mdl",
+          "begin": "//",
+          "beginCaptures": { "0": { "name": "punctuation.definition.comment.mdl" } },
+          "end": "$",
+          "patterns": [
+            {
+              "name": "keyword.documentation.mdl",
+              "match": "@[_A-Za-z][A-Za-z0-9_-]*"
+            }
+          ]
+        }
+      ]
+    },
+    "declaration-keywords": {
+      "patterns": [
+        {
+          "name": "keyword.declaration.mdl",
+          "match": "\\bstruct\\b(?=\\s+[_A-Za-z][_A-Za-z0-9]*\\s*\\{)"
+        },
+        {
+          "name": "keyword.declaration.mdl",
+          "match": "\\bstruct\\b(?=\\s*\\{)"
+        },
+        {
+          "name": "keyword.declaration.mdl",
+          "match": "\\bmodule\\b(?=\\s+[_A-Za-z][_A-Za-z0-9]*\\s*\\[)"
+        },
+        {
+          "name": "keyword.declaration.mdl",
+          "match": "\\btemplate\\b(?=\\s*<)"
+        }
+      ]
+    },
+    "brackets": {
+      "patterns": [
+        { "name": "punctuation.definition.bracket.curly.mdl", "match": "\\{" },
+        { "name": "punctuation.definition.bracket.curly.mdl", "match": "\\}" },
+        { "name": "punctuation.definition.bracket.round.mdl", "match": "\\(" },
+        { "name": "punctuation.definition.bracket.round.mdl", "match": "\\)" },
+        { "name": "punctuation.definition.bracket.square.mdl", "match": "\\[" },
+        { "name": "punctuation.definition.bracket.square.mdl", "match": "\\]" }
+      ]
+    },
+    "function-calls": {
+      "patterns": [
+        {
+          "name": "entity.name.function.mdl",
+          "match": "\\b[_A-Za-z][_A-Za-z0-9]*(?=\\s*\\()"
+        }
+      ]
+    },
+    "einops": {
+      "patterns": [
+        {
+          "name": "meta.einops.mdl",
+          "begin": "\\[(?=[^\\]]*->)",
+          "beginCaptures": { "0": { "name": "punctuation.definition.bracket.begin.mdl" } },
+          "end": "\\]",
+          "endCaptures": { "0": { "name": "punctuation.definition.bracket.end.mdl" } },
+          "patterns": [
+            { "name": "keyword.operator.einops.mdl", "match": "->|\\|" },
+            { "name": "punctuation.separator.einops.mdl", "match": "," },
+            { "name": "constant.language.elipsis.einops.mdl", "match": "\\.\\.\\." },
+            { "name": "variable.parameter.einops.mdl", "match": "\\b[_A-Za-z][_A-Za-z0-9]*\\b" },
+            { "name": "constant.numeric.integer.einops.mdl", "match": "\\b-?[0-9]+\\b" },
+            { "name": "constant.numeric.slice.einops.mdl", "match": "/\\s*-?[0-9]+" }
+          ]
+        }
+      ]
+    },
+    "control-keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.mdl",
+          "match": "\\breturn\\b"
+        }
+      ]
+    },
+    "types": {
+      "patterns": [
+        {
+          "name": "storage.type.mdl",
+          "match": "(?<=:\\s*)(?:[_A-Za-z][_A-Za-z0-9]*)"
+        },
+        {
+          "name": "entity.name.type.mdl",
+          "match": "\\b[A-Z][_A-Za-z0-9]*\\b"
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        { "name": "constant.numeric.float.mdl", "match": "-?[0-9]*\\.[0-9]+(?:e-?[0-9]+)?" },
+        { "name": "constant.numeric.integer.mdl", "match": "-?[0-9]+" }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        { "name": "keyword.operator.mdl", "match": "=>|->|\\+|-|\\*|/|@|\\.|,|:|;|\\[|\\]|\\(|\\)|\\{|\\}|=|<|>|\\||\\?" }
+      ]
+    },
+    "identifiers": {
+      "patterns": [
+        { "name": "variable.other.mdl", "match": "\\b[_A-Za-z][_A-Za-z0-9]*\\b" }
+      ]
+    }
+  },
+  "foldingStartMarker": "\\{",
+  "foldingStopMarker": "\\}"
+}
