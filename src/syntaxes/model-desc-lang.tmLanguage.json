@@ -46,20 +46,28 @@
     "declaration-keywords": {
       "patterns": [
         {
-          "name": "keyword.declaration.mdl",
+          "name": "storage.type.struct.mdl",
           "match": "\\bstruct\\b(?=\\s+[_A-Za-z][_A-Za-z0-9]*\\s*\\{)"
         },
         {
-          "name": "keyword.declaration.mdl",
+          "name": "storage.type.struct.mdl",
           "match": "\\bstruct\\b(?=\\s*\\{)"
         },
         {
-          "name": "keyword.declaration.mdl",
+          "name": "storage.type.class.mdl",
           "match": "\\bmodule\\b(?=\\s+[_A-Za-z][_A-Za-z0-9]*\\s*\\[)"
         },
         {
           "name": "keyword.declaration.mdl",
           "match": "\\btemplate\\b(?=\\s*<)"
+        },
+        {
+          "name": "keyword.control.directive.include.mdl",
+          "match": "\\bimport\\b"
+        },
+        {
+          "name": "keyword.other.mdl",
+          "match": "\\b(?:auto|masked|array)\\b"
         }
       ]
     },
@@ -104,7 +112,7 @@
       "patterns": [
         {
           "name": "keyword.control.mdl",
-          "match": "\\breturn\\b"
+          "match": "\\b(?:return|for|in)\\b"
         }
       ]
     },

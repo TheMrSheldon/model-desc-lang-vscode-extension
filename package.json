@@ -9,8 +9,7 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-  ],
+  "activationEvents": [],
   "main": "./dist/client.js",
   "contributes": {
     "languages": [
@@ -31,8 +30,48 @@
     ],
     "commands": [
       {
-        "command": "mdl-language-server.helloWorld",
-        "title": "Hello World"
+        "command": "mdl.restartServer",
+        "title": "MDL: Restart Language Server"
+      }
+    ],
+    "configuration": {
+      "title": "Model Description Language",
+      "properties": {
+        "mdl.server.path": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Path to the `mdls` executable. Empty: use an `mdls` from the `PATH` (a local MDL installation), else the one bundled with the extension."
+        },
+        "mdl.importDirs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Additional directories that are searched for imported files."
+        },
+        "mdl.float": {
+          "type": "string",
+          "enum": [
+            "f32",
+            "bf16",
+            "f16"
+          ],
+          "default": "f32",
+          "description": "The type that `float` stands for."
+        },
+        "mdl.server.preferBundled": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Use the `mdls` bundled with the extension even if there is one on the `PATH`. Ignored if `mdl.server.path` is set."
+        }
+      }
+    },
+    "semanticTokenTypes": [
+      {
+        "id": "axis",
+        "superType": "typeParameter",
+        "description": "An axis name in an einops pattern"
       }
     ]
   },
@@ -45,7 +84,8 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "fetch-server": "node scripts/fetch-server.mjs"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -61,8 +101,11 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
-    "vscode-languageclient": "^9.0.1",
-    "vscode-languageserver": "^9.0.1",
-    "vscode-languageserver-textdocument": "^1.0.12"
+    "mathjax-full": "3.2.2",
+    "vscode-languageclient": "^9.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheMrSheldon/model-desc-lang-vscode-extension.git"
   }
 }

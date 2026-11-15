@@ -4,14 +4,19 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  build-nightly:
+  package:
+    name: Package (${{ matrix.target }})
     runs-on: ubuntu-latest
-
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [linux-x64, linux-arm64, darwin-x64, darwin-arm64, win32-x64, win32-arm64]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,29 +27,59 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'pnpm'
       - name: Install dependencies
         run: pnpm install
-      - name: Compile extension
-        run: pnpm run package
+      - name: Fetch the MDL tools (version pinned in mdl-version.txt)
+        run: node scripts/fetch-server.mjs --target ${{ matrix.target }}
+      - name: Lint
+        run: pnpm run lint
       - name: Compute nightly version
         id: version
         run: |
           COMMIT_SHA=$(git rev-parse --short HEAD)
           DATE=$(date +'%Y%m%d')
           BASE_VERSION=$(jq -r .version package.json)
-          NIGHTLY_VERSION="${BASE_VERSION}-nightly.${DATE}+${COMMIT_SHA}"
-          echo "nightly_version=$NIGHTLY_VERSION" >> $GITHUB_OUTPUT
-          echo "Patched version: $NIGHTLY_VERSION"
+          echo "nightly_version=${BASE_VERSION}-nightly.${DATE}+${COMMIT_SHA}" >> $GITHUB_OUTPUT
       - name: Patch package.json
         run: |
           jq ".version = \"${{ steps.version.outputs.nightly_version }}\"" package.json > package.tmp.json
           mv package.tmp.json package.json
-      - name: Install vsce
-        run: pnpm add -g @vscode/vsce
       - name: Package VSIX
-        run: vsce package --no-dependencies --out mdl-extension.vsix
+        run: pnpm dlx @vscode/vsce package --no-dependencies --target ${{ matrix.target }} --out mdl-extension-${{ matrix.target }}.vsix
+      - name: Check that the VSIX contains the server
+        run: |
+          unzip -l mdl-extension-${{ matrix.target }}.vsix | grep -E "extension/server/bin/mdls(\.exe)?$"
+          unzip -l mdl-extension-${{ matrix.target }}.vsix | grep "extension/server/share/mdl/std/nn.dlm"
+      - name: Smoke-test the packaged server (linux-x64 only, the runner's own platform)
+        if: matrix.target == 'linux-x64'
+        run: |
+          unzip -q mdl-extension-linux-x64.vsix -d unpacked
+          chmod +x unpacked/extension/server/bin/mdls
+          msg() { printf 'Content-Length: %d\r\n\r\n%s' "${#1}" "$1"; }
+          # A full session: initialize, shutdown, exit (mdls exits with 0 only after a shutdown)
+          REPLY=$( { msg '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}'
+                     msg '{"jsonrpc":"2.0","id":2,"method":"shutdown"}'
+                     msg '{"jsonrpc":"2.0","method":"exit"}'; } | unpacked/extension/server/bin/mdls )
+          echo "$REPLY"
+          echo "$REPLY" | grep -q '"name":"mdls"'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vsix-${{ matrix.target }}
+          path: mdl-extension-${{ matrix.target }}.vsix
+
+  release:
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: vsix-*
+          path: vsix
+          merge-multiple: true
       - name: Delete previous nightly release
         continue-on-error: true
         run: |
@@ -56,8 +91,8 @@ jobs:
         run: |
           gh release create nightly \
             --title "Nightly Build" \
-            --notes "Automated nightly build from master branch." \
+            --notes "Automated nightly build from master branch (one VSIX per platform)." \
             --prerelease \
-            mdl-extension.vsix
+            vsix/*.vsix
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -8,9 +8,15 @@ src/**/*.ts
 .gitignore
 .yarnrc
 webpack.config.js
-vsc-extension-quickstart.md
 **/tsconfig.json
 **/eslint.config.mjs
 **/*.map
 **/*.ts
 **/.vscode-test.*
+mdl-copy-do-not-commit/**
+*.vsix
+pnpm-lock.yaml
+server/bin/mdl-format*
+.pnpm-store/**
+scripts/**
+mdl-version.txt

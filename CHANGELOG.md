@@ -6,4 +6,6 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
-- Initial release
+- Language client for `mdls` (bundled per platform, or a local installation)
+- Diagnostics, completion, hover (with MathJax formulas), go to definition, formatting, outline, semantic tokens
+- Syntax highlighting and comment handling in the language configuration
